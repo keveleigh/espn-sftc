@@ -3,7 +3,7 @@
 """
 """
 
-import urllib2
+import urllib.request
 import re
 import xlsxwriter
 import operator
@@ -19,13 +19,13 @@ allProps = collections.OrderedDict()
 def _format_url(date):
     """Format ESPN link to scrape records from."""
     link = ['http://streak.espn.go.com/en/entry?date=' + date]
-    print date
+    print(date)
     return link[0]
 
 def scrape_props(espn_page):
     """Scrape ESPN's pages for data."""
     global allProps
-    url = urllib2.urlopen(espn_page)
+    url = urllib.request.urlopen(espn_page)
 ##    print url.geturl()
     soup = bs(url.read(), ['fast', 'lxml'])
 
@@ -116,4 +116,4 @@ if __name__ == '__main__':
     import time
     start = time.time()
     main(sys.argv[1:])
-    print time.time() - start, 'seconds'
+    print(time.time() - start, 'seconds')
