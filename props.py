@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 
 """
+This scrapes Streak for the Cash information from ESPN and writes it to an Excel spreadsheet.
+It uses BeautifulSoup 4 and xlsxwriter.
+
+In order to use this, you will need to download bs4, lxml, and xlsxwriter.
+
+Prop array format: [Sport, League, Prop, Active Picks %, Winner, Winner %, Loser, Loser %]
+
+Command format: python props.py [number of days]
 """
 
 import urllib.request
@@ -70,6 +78,8 @@ def scrape_props(espn_page, allProps):
             propArray.append(info[0].parent.get_text()[1:])
             propArray.append(percentages[0].text)
 
+        # Prop array format:
+        # [Sport, League, Prop, Active Picks %, Winner, Winner %, Loser, Loser %]
         allProps[format_time.date()].append(propArray)
 
 
