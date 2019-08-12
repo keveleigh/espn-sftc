@@ -16,50 +16,52 @@ from bs4 import BeautifulSoup
 
 allProps = collections.OrderedDict()
 
+
 def _format_url(date):
     """Format ESPN link to scrape records from."""
     link = ['http://streak.espn.go.com/en/entry?date=' + date]
     print(date)
     return link[0]
 
+
 def scrape_props(espn_page):
     """Scrape ESPN's pages for data."""
     global allProps
     url = urllib.request.urlopen(espn_page)
-##    print url.geturl()
     soup = BeautifulSoup(url.read(), 'lxml')
 
-    props = soup.find_all('div', attrs={'class':'matchup-container'})
+    props = soup.find_all('div', attrs={'class': 'matchup-container'})
 
     for prop in props:
         propArray = []
-        
-        time = prop.find('span', {'class':'startTime'})['data-locktime']
+
+        time = prop.find('span', {'class': 'startTime'})['data-locktime']
         time = time[:-4]
         format_time = datetime.strptime(time, '%B %d, %Y %I:%M:%S %p')
-                
-        sport = prop.find('div', {'class':'sport-description'})
+
+        sport = prop.find('div', {'class': 'sport-description'})
         if sport:
             propArray.append(sport.text)
         else:
             propArray.append('Adhoc')
 
-        title = prop.find('div', {'class':['gamequestion','left']}).text.split(': ')
+        title = prop.find(
+            'div', {'class': ['gamequestion', 'left']}).text.split(': ')
         propArray.append(title[0])
         propArray.append(title[1])
 
-        overall_percentage = prop.find('div', {'class':'progress-bar'})
+        overall_percentage = prop.find('div', {'class': 'progress-bar'})
         propArray.append(overall_percentage['title'].split(' ')[3])
 
-        percentages = prop.find_all('span', {'class':'wpw'})
-        
-        info = prop.find_all('span', {'class':'winner'})
-        temp = info[0].parent.find_all('span', {'id':'oppAddlText'})
+        percentages = prop.find_all('span', {'class': 'wpw'})
+
+        info = prop.find_all('span', {'class': 'winner'})
+        temp = info[0].parent.find_all('span', {'id': 'oppAddlText'})
         [rec.extract() for rec in temp]
 
-        temp = info[1].parent.find_all('span', {'id':'oppAddlText'})
+        temp = info[1].parent.find_all('span', {'id': 'oppAddlText'})
         [rec.extract() for rec in temp]
-        
+
         if info[0].contents[0].name == 'img':
             propArray.append(info[0].parent.get_text())
             propArray.append(percentages[0].text)
@@ -73,6 +75,7 @@ def scrape_props(espn_page):
 
         allProps[format_time.date()].append(propArray)
 
+
 def write_to_excel():
     global allProps
 
@@ -84,12 +87,12 @@ def write_to_excel():
     #ws.set_column(5, 5, 2.29)
 
     date_format = wb.add_format({'num_format': 'mm/dd/yy'})
-    format_percentage = wb.add_format({'num_format':'0.0"%"'})
-    format_percentage2 = wb.add_format({'num_format':'0.00"%"'})
+    format_percentage = wb.add_format({'num_format': '0.0"%"'})
+    format_percentage2 = wb.add_format({'num_format': '0.00"%"'})
 
     i = 0
     for date in allProps:
-        for prop in allProps[date]:     
+        for prop in allProps[date]:
             ws.write(i, 0, date, date_format)
             ws.write(i, 1, prop[0])
             ws.write(i, 2, prop[1])
@@ -99,18 +102,20 @@ def write_to_excel():
             ws.write(i, 6, float(prop[5][:-1]), format_percentage)
             ws.write(i, 7, prop[6])
             ws.write(i, 8, float(prop[7][:-1]), format_percentage)
-            i+=1   
+            i += 1
     wb.close()
+
 
 def main(argv):
     global allProps
 
-    for x in range(0,int(argv[0])):
+    for x in range(0, int(argv[0])):
         newDate = date.today() - timedelta(days=x + 1)
         allProps[newDate] = []
         scrape_props(_format_url(newDate.strftime('%Y%m%d')))
 
     write_to_excel()
+
 
 if __name__ == '__main__':
     import time
