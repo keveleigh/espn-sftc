@@ -12,7 +12,7 @@ import sys
 import ast
 import os
 from datetime import date, timedelta, datetime
-from bs4 import BeautifulSoup as bs
+from bs4 import BeautifulSoup
 
 allProps = collections.OrderedDict()
 
@@ -27,7 +27,7 @@ def scrape_props(espn_page):
     global allProps
     url = urllib.request.urlopen(espn_page)
 ##    print url.geturl()
-    soup = bs(url.read(), ['fast', 'lxml'])
+    soup = BeautifulSoup(url.read(), 'lxml')
 
     props = soup.find_all('div', attrs={'class':'matchup-container'})
 
