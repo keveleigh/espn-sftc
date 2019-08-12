@@ -14,8 +14,6 @@ import os
 from datetime import date, timedelta, datetime
 from bs4 import BeautifulSoup
 
-allProps = collections.OrderedDict()
-
 
 def _format_url(date):
     """Format ESPN link to scrape records from."""
@@ -24,9 +22,8 @@ def _format_url(date):
     return link[0]
 
 
-def scrape_props(espn_page):
+def scrape_props(espn_page, allProps):
     """Scrape ESPN's pages for data."""
-    global allProps
     url = urllib.request.urlopen(espn_page)
     soup = BeautifulSoup(url.read(), 'lxml')
 
@@ -76,9 +73,7 @@ def scrape_props(espn_page):
         allProps[format_time.date()].append(propArray)
 
 
-def write_to_excel():
-    global allProps
-
+def write_to_excel(allProps):
     wb = xlsxwriter.Workbook('Streak.xlsx')
 
     ws = wb.add_worksheet('All Props')
@@ -107,14 +102,14 @@ def write_to_excel():
 
 
 def main(argv):
-    global allProps
+    allProps = collections.OrderedDict()
 
     for x in range(0, int(argv[0])):
         newDate = date.today() - timedelta(days=x + 1)
         allProps[newDate] = []
-        scrape_props(_format_url(newDate.strftime('%Y%m%d')))
+        scrape_props(_format_url(newDate.strftime('%Y%m%d')), allProps)
 
-    write_to_excel()
+    write_to_excel(allProps)
 
 
 if __name__ == '__main__':
